@@ -16,5 +16,8 @@
     "url": "https://github.com/tiffkchui/tinyapp/issues"
   },
   "homepage": "https://github.com/tiffkchui/tinyapp#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
