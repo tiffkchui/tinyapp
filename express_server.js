@@ -6,9 +6,6 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 
 
-
-
-
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -48,6 +45,12 @@ app.get("/set", (req, res) => {
  app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+app.post('/urls/:id/delete', (req, res) => {
+  const id = req.params.id;
+  delete urlDatabase[id];
+  res.redirect('/urls');
 });
 
 app.get("/hello", (req, res) => {
