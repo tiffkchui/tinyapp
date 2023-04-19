@@ -21,6 +21,7 @@
   <body>
 
     <header>
+      
       <nav class="navbar navbar-expand-md navbar-dark bg-success">
         <a class="navbar-brand" href="/urls">TinyApp</a>
         <button
@@ -40,6 +41,13 @@
             <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
           </div>
         </div>
+        <form method="POST" action="/login" class="form-inline my-2 my-lg-0">
+          <div class="form-group mr-sm-2">
+            <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+          </div>
+          <button type="submit" class="btn btn-outline-light my-2 my-sm-0">Log In</button>
+        </form>
+        
       </nav>
     </header>
 
