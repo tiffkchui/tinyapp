@@ -3,6 +3,8 @@ const app = express();
 const PORT = 8080; // default port 8080
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+const morgan = require('morgan')
+app.use(morgan())
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
@@ -125,6 +127,37 @@ app.get('/register', (req, res) => {
   res.render('urls_registration');
 });
 
+function getUserByEmail(email) {
+  for (const id in users) {
+    const user = users[id];
+    if (user.email === email) {
+      return user;
+    }
+  }
+  return null;
+}
+app.post('/register', (req, res) => {
+  const { name, email, password } = req.body;
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: 'Name, email, and password are required' });
+  }
+  const existingUser = getUserByEmail(email);
+  if (existingUser) {
+    return res.status(400).json({ error: 'Email already exists' });
+  }
+  const user = {
+    id: generateRandomString(),
+    name,
+    email,
+    password: bcrypt.hashSync(password, saltRounds),
+  };
+  users[user.id] = user;
+  req.session.user_id = user.id;
+  res.redirect('/urls');
+});
+
+
+
 app.get("/urls/new", (req, res) => {
   const templateVars = {
     username: req.cookies.username
@@ -143,10 +176,21 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
+
+
+app.get('/login', (req, res) => {
+  const templateVars = { user: null };
+  res.render('login', templateVars);
+});
+
+
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   let user = null;
+  
+
+  
 
   // Find the user with the given email and password in the users object
   for (const userId in users) {

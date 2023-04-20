@@ -23,6 +23,18 @@
   <nav>
 
     <nav>
+      <ul>
+        <li><a href="/urls">Home</a></li>
+        <% if (user) { %>
+          <li><a href="/logout">Logout</a></li>
+        <% } else { %>
+          <li><a href="/register">Register</a></li>
+          <li><a href="/login">Login</a></li>
+        <% } %>
+      </ul>
+    </nav>
+
+    <nav>
       <% if (user) { %>
         <span class="navbar-text mr-2">Logged in as: <%= user.email %></span>
         <form method="POST" action="/logout" class="form-inline my-2 my-lg-0">
@@ -36,6 +48,8 @@
           <button type="submit" class="btn btn-outline-light my-2 my-sm-0">Log In</button>
         </form>
       <% } %>
+
+      
   
 
 </nav>
