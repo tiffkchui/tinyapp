@@ -78,13 +78,14 @@ app.get("/u/:id", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    username: req.cookies.username
   };
+  console.log(templateVars.username)
   res.render("urls_index", templateVars);
 });
 
 app.post('/login', (req, res) => {
-  const username = req.cookies.username;
+  const username = req.body.username;
   res.cookie('username', username);
   res.redirect('/urls');
 });
