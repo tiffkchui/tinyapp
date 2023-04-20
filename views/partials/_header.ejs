@@ -1,30 +1,39 @@
 <header>
-  <nav class="navbar navbar-expand-md navbar-dark bg-success">
+  <nav class="navbar navbar-expand-md navbar-dark bg-info">
     <a class="navbar-brand" href="/urls">TinyApp</a>
-    <form method="POST" action="/login" class="form-inline my-2 my-lg-0">
-      <div class="form-group mr-sm-2">
-        <input type="text" class="form-control" id="username" name="username" placeholder="Username">
-      </div>
-      <button type="submit" class="btn btn-outline-light my-2 my-sm-0">Log In</button>
-        <span class="navbar-text mr-2"><%= username %></span>
-    </form>
     <button
-      class="navbar-toggler"
-      type="button"
-      data-toggle="collapse"
-      data-target="#navbarNavAltMarkup"
-      aria-controls="navbarNavAltMarkup"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-      </div>
+    class="navbar-toggler"
+    type="button"
+    data-toggle="collapse"
+    data-target="#navbarNavAltMarkup"
+    aria-controls="navbarNavAltMarkup"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-item nav-link" href="/urls">My URLs</a>
+      <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
     </div>
-  </nav>
-</header>
+  </div>
 
+
+<% if (!username) { %>
+      <form method="POST" action="/login" class="form-inline my-2 my-lg-0">
+        <div class="form-group mr-sm-2">
+          <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+        </div>
+        <button type="submit" class="btn btn-outline-light my-2 my-sm-0">Log In</button>
+      </form>
+
+<% } else { %>
+<span class="navbar-text mr-2">Logged in as: <%= username %></span>
+<form method="POST" action="/logout" class="form-inline my-2 my-lg-0">
+  <button type="submit" class="btn btn-outline-light my-2 my-sm-0">Log Out</button>
+</form>
+<% } %>
+
+</nav>
+</header>

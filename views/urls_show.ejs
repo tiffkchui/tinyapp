@@ -8,70 +8,21 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
-    <title>URL - TinyApp Example</title>
-
-    <form method="POST" action="/login" class="form-inline my-2 my-lg-0">
-      <div class="form-group mr-sm-2">
-        <input type="text" class="form-control" id="username" name="username" placeholder="Username">
-      </div>
-      <button type="submit" class="btn btn-outline-light my-2 my-sm-0">Log In</button>
-    </form>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-toggle="collapse"
-      data-target="#navbarNavAltMarkup"
-      aria-controls="navbarNavAltMarkup"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-      </div>
-    </div>
-  </nav>
-</header>
+    <title>very amazing bit.ly copy :-D</title>
 
 
-  </head>
+
 
   <body>
 
-    <header>
-      <nav class="navbar navbar-expand-md navbar-dark bg-success">
-        <a class="navbar-brand" href="/urls">TinyApp</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarNavAltMarkup"
-          aria-controls="navbarNavAltMarkup"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-      </nav>
-    </header>
-
+    <%- include("partials/_header") %>
 
     <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <h5 class="card-title">TinyURL for: <p><%= longURL %></p></h5>
         <p class="card-text">
           Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
-          <form method="POST" action="/urls/<%= id %>/update">
-            <div class="form-group">
-              <label for="longURL">Long URL:</label>
-              <input type="text" class="form-control" id="longURL" name="longURL" value="<%= longURL %>">
-            </div>
-            <button type="submit" class="btn btn-primary">Update</button>
-          </form>
           <form method="POST" action="/urls/<%= id %>/update">
             <div class="form-group">
               <label for="longURL">Long URL:</label>
