@@ -20,20 +20,23 @@
   </div>
 
 
-<% if (!username) { %>
-      <form method="POST" action="/login" class="form-inline my-2 my-lg-0">
-        <div class="form-group mr-sm-2">
-          <input type="text" class="form-control" id="username" name="username" placeholder="Username">
-        </div>
-        <button type="submit" class="btn btn-outline-light my-2 my-sm-0">Log In</button>
-      </form>
+  <nav>
 
-<% } else { %>
-<span class="navbar-text mr-2">Logged in as: <%= username %></span>
-<form method="POST" action="/logout" class="form-inline my-2 my-lg-0">
-  <button type="submit" class="btn btn-outline-light my-2 my-sm-0">Log Out</button>
-</form>
-<% } %>
+    <nav>
+      <% if (user) { %>
+        <span class="navbar-text mr-2">Logged in as: <%= user.email %></span>
+        <form method="POST" action="/logout" class="form-inline my-2 my-lg-0">
+          <button type="submit" class="btn btn-outline-light my-2 my-sm-0">Log Out</button>
+        </form>
+      <% } else { %>
+        <form method="POST" action="/login" class="form-inline my-2 my-lg-0">
+          <div class="form-group mr-sm-2">
+            <input type="text" class="form-control" id="user" name="user" placeholder="user">
+          </div>
+          <button type="submit" class="btn btn-outline-light my-2 my-sm-0">Log In</button>
+        </form>
+      <% } %>
+  
 
 </nav>
 </header>

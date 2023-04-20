@@ -8,10 +8,16 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 
 
+
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+
+
+//generates random string of letters + numbers to create a short URL
 
 function generateRandomString() {
   const alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -23,6 +29,46 @@ function generateRandomString() {
 
   return result;
 }
+
+
+
+
+
+const users = {
+  userRandomID: {
+    id: "april",
+    email: "april@showers.com",
+    password: "aprilshowers",
+  },
+  user2RandomID: {
+    id: "may",
+    email: "may@flowers.com",
+    password: "mayflowers",
+  },
+};
+
+
+app.post('/login', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  let user = null;
+
+  // Find the user with the given email and password in the users object
+  for (const userId in users) {
+    const u = users[userId];
+    if (u.email === email && u.password === password) {
+      user = u;
+      break;
+    }
+  }
+
+  if (user === null) {
+    res.status(403).send('Invalid email or password');
+  } else {
+    res.cookie('user_id', user.id);
+    res.redirect('/urls');
+  }
+});
 
 
 app.get("/", (req, res) => {
@@ -49,9 +95,8 @@ app.get("/fetch", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies.username
+    user: users[req.cookies.user_id]
   };
-  console.log(templateVars.username);
   res.render("urls_index", templateVars);
 });
 
@@ -99,16 +144,33 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  const username = req.body.username;
-  console.log(username);
-  res.cookie('username', username);
+  const email = req.body.email;
+  const password = req.body.password;
+  let user = null;
+
+  // Find the user with the given email and password in the users object
+  for (const userId in users) {
+    const u = users[userId];
+    if (u.email === email && u.password === password) {
+      user = u;
+      break;
+    }
+  }
+
+  if (user === null) {
+    res.status(403).send('Invalid email or password');
+  } else {
+    res.cookie('user_id', user.id);
+    res.redirect('/urls');
+  }
+});
+
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
-app.post('/logout', (req, res) => {
-  res.clearCookie('username');
-  res.redirect('/urls');
-});
 
 app.use((req, res, next) => {
   res.locals.username = req.cookies.username;
