@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
 
-
+//DATABASE FOR URLS
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -34,7 +34,7 @@ function generateRandomString() {
 
 
 
-
+//USER
 
 const users = {
   userRandomID: {
@@ -50,24 +50,17 @@ const users = {
 };
 
 
+// LOGIN
+
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  let user = null;
+  const user = getUserByEmail(email);
 
-  // Find the user with the given email and password in the users object
-  for (const userId in users) {
-    const u = users[userId];
-    if (u.email === email && u.password === password) {
-      user = u;
-      break;
-    }
-  }
-
-  if (user === null) {
+  if (user === null || !bcrypt.compareSync(password, user.password)) {
     res.status(403).send('Invalid email or password');
   } else {
-    res.cookie('user_id', user.id);
+    req.session.user_id = user.id;
     res.redirect('/urls');
   }
 });
@@ -116,7 +109,7 @@ app.get("/hello", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: req.params.id,
-    username: req.cookies.username
+    user: req.cookies.usern
   };
   const longURL = urlDatabase[templateVars.id];
   templateVars.longURL = longURL;
@@ -160,7 +153,7 @@ app.post('/register', (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies.username
+    user: req.cookies.user
   };
   res.render("urls_new", templateVars);
 });
@@ -179,8 +172,12 @@ app.get("/u/:id", (req, res) => {
 
 
 app.get('/login', (req, res) => {
-  const templateVars = { user: null };
-  res.render('login', templateVars);
+  if (req.session.user_id) {
+    res.redirect('/urls');
+  } else {
+    const templateVars = { user: null };
+    res.render('urls_login', templateVars);
+  }
 });
 
 
@@ -217,7 +214,7 @@ app.post('/logout', (req, res) => {
 
 
 app.use((req, res, next) => {
-  res.locals.username = req.cookies.username;
+  res.locals.user = req.cookies.user;
   next();
 });
 
