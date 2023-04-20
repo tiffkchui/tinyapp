@@ -24,6 +24,7 @@ function generateRandomString() {
   return result;
 }
 
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -75,6 +76,9 @@ app.get("/urls/:id", (req, res) => {
   res.render('urls_show', templateVars);
 });
 
+app.get('/register', (req, res) => {
+  res.render('urls_registration');
+});
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
@@ -93,7 +97,6 @@ app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
 });
-
 
 app.post('/login', (req, res) => {
   const username = req.body.username;
