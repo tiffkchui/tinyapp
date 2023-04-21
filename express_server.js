@@ -171,13 +171,12 @@ app.get("/u/:id", (req, res) => {
 
 
 
-app.get('/login', (req, res) => {
-  if (req.session.user_id) {
-    res.redirect('/urls');
-  } else {
-    const templateVars = { user: null };
-    res.render('urls_login', templateVars);
-  }
+app.get("/login", (req, res) => {
+  const templateVars = {
+    userID: null,
+    user: users[req.session.userID],
+  };
+  res.render("user_login", templateVars);
 });
 
 
