@@ -55,8 +55,7 @@ const urlsForUser = (id, db) => {
 const getUserByEmail = (email, db) => {
   // loop in database keys
   for (let key in db) {
-    console.log("this is a key:")
-    console.log(key)
+
     // compare the emails, if they match return the user obj
     if (db[key].email === email) {
       return db[key];

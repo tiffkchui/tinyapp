@@ -1,16 +1,32 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const { getUserByEmail } = require('../helpers.js');
+
+
+
+//MIDDLEWARE
+const cookieSession = require('cookie-session');
+app.use(cookieSession({ name: 'session', keys: ['key1', 'key2'] }));
+const morgan = require('morgan');
+app.use(morgan());
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
 
+const bcrypt = require("bcryptjs");
+const password = "wowitsgreat"; // found in the req.body object
+const hashedPassword = bcrypt.hashSync(password, 10);
 
+// DATABASE FOR URLS
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
+
+
+// generates random string of letters + numbers to create a short URL
 function generateRandomString() {
   const alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
@@ -19,8 +35,41 @@ function generateRandomString() {
     result += alphanumeric.charAt(Math.floor(Math.random() * alphanumeric.length));
   }
 
-  return result;}
+  return result;
+}
 
+
+
+// USER
+const users = {
+  userRandomID: {
+    id: "april",
+    email: "april@showers.com",
+    password: "aprilshowers",
+  },
+  user2RandomID: {
+    id: "may",
+    email: "may@flowers.com",
+    password: "mayflowers",
+  },
+};
+
+
+// LOGIN
+app.post('/login', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = getUserByEmail(email);
+
+  if (user === null || !bcrypt.compareSync(password, user.password)) {
+    res.status(403).send('Invalid email or password');
+  } else {
+    req.session.user_id = user.id;
+    res.redirect('/urls');
+  }
+});
+
+// sample REST get call
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -33,47 +82,154 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+//SAMPLE hello
+// app.get("/hello", (req, res) => {
+//   const templateVars = { greeting: "Hello World!" };
+//   res.render("hello_world", templateVars);
+// });
+
 app.get("/set", (req, res) => {
   const a = 1;
   res.send(`a = ${a}`);
- });
- 
- app.get("/fetch", (req, res) => {
-  res.send(`a = ${a}`);
- });
+});
 
- app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+app.get("/fetch", (req, res) => {
+  res.send(`a = ${a}`);
+});
+
+// MY URLS
+app.get("/urls", (req, res) => {
+  const templateVars = {
+    urls: urlDatabase,
+    user: users[req.session.user_id]
+  };
   res.render("urls_index", templateVars);
 });
 
+
+// DELETE URL
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect('/urls');
 });
 
-app.get("/hello", (req, res) => {
-  const templateVars = { greeting: "Hello World!" };
-  res.render("hello_world", templateVars);
+// GET LONG URL FROM SHORT URL ID
+app.get("/urls/:id", (req, res) => {
+  const templateVars = {
+    id: req.params.id,
+    user: req.session.user
+  };
+  const longURL = urlDatabase[templateVars.id];
+  templateVars.longURL = longURL;
+  res.render('urls_show', templateVars);
 });
 
+
+// REGISTRATION PAGE
+app.get('/register', (req, res) => {
+  res.render('urls_registration');
+});
+
+function getUserByEmail(email) {
+  for (const id in users) {
+    const user = users[id];
+    if (user.email === email) {
+      return user;
+    }
+  }
+  return null;
+}
+
+// USER REGISTRATION 
+app.post('/register', (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Name, email, and password are required' });
+  }
+  const existingUser = getUserByEmail(email);
+  if (existingUser) {
+    return res.status(400).json({ error: 'Email already exists' });
+  }
+  const user = {
+    id: generateRandomString(),
+    email,
+    password: bcrypt.hashSync(password, 10),
+  };
+  users[user.id] = user;
+  req.session.user_id = user.id;
+  res.redirect('/urls');
+});
+
+
+// SHORT URL GENERATOR PAGE
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    user: req.session.user
+  };
+  res.render("urls_new", templateVars);
 });
 
+// GENERATES SHORT URLS FROM LONG URLS
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(); // generate a new short URL
   urlDatabase[shortURL] = req.body.longURL; // save the id-longURL pair to urlDatabase
-  res.redirect(`/u/${shortURL}`); // redirect the user to the new short URL's page
+  res.redirect(`/urls/${shortURL}`); // redirect the user to the new short URL's page
 });
 
+// 
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
 });
 
+
+// LOGIN PAGE
+app.get("/login", (req, res) => {
+  const templateVars = {
+    userID: null,
+    user: users[req.session.userID],
+  };
+  res.render("urls_login", templateVars);
+});
+
+
+// USER LOGIN
+app.post('/login', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  let user = null;
+
+  // Find the user with the given email and password in the users object
+  for (const userId in users) {
+    const u = users[userId];
+    if (u.email === email && u.password === password) {
+      user = u;
+      break;
+    }
+  }
+
+  // if the user does not exist, send error
+  if (user === null) {
+    res.status(403).send('Invalid email or password');
+  } else {
+    res.cookie('user_id', user.id);
+    res.redirect('/urls');
+  }
+});
+
+// LOGOUT
+app.post('/logout', (req, res) => {
+  req.session = null;
+  res.redirect('/login');
+});
+
+
+app.use((req, res, next) => {
+  res.locals.user = req.session.user;
+  next();
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
