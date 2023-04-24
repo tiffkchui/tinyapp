@@ -10,6 +10,7 @@ const { getUserByEmail} = require('./helpers.js');
 //MIDDLEWARE
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan('dev')); //console logs the request that comes on terminal
 app.use(cookieSession({ name: 'session', keys: ['key1', 'key2'] }));
 app.use((req, res, next) => {
@@ -176,18 +177,6 @@ app.post('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-
-// if the user does not exist, send error
-const email = req.body.email;
-const user = getUserByEmail(email, users);
-if (typeof user === 'undefined') {
-  res.status(403).send('Error: Incorrect username or password');
-  return;
-}
-if (!bcrypt.compareSync(password, user.password)) {
-  res.status(403).send('Error: Incorrect password');
-  return;
-}
 
 
 
