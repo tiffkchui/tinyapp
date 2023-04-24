@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const bcrypt = require('bcryptjs');
 const PORT = 8080; // default port 8080
 const cookieSession = require('cookie-session');
-const { getUserByEmail } = require('../helpers.js');
+const { getUserByEmail} = require('./helpers');
 
 //MIDDLEWARE
 app.set("view engine", "ejs");
@@ -61,9 +61,9 @@ app.get("/urls", (req, res) => {
   };
 
   if (!user) {
-   return document.body.innerHTML = "<p>401: ERROR. Unauthorised. Please log in to view page.";
+    return document.body.innerHTML = "<p>401: ERROR. Unauthorised. Please log in to view page.";
   }
-  
+
   res.render("url_index", templateVars);
 });
 
@@ -166,23 +166,23 @@ app.post('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-  // Find the user with the given email and password in the users object
-  for (const userId in users) {
-    const u = users[userId];
-    if (u.email === email && u.password === password) {
-      user = u;
-      break;
-    }
+// Find the user with the given email and password in the users object
+for (const userId in users) {
+  const u = users[userId];
+  if (u.email === email && u.password === password) {
+    user = u;
+    break;
   }
+}
 
-  // if the user does not exist, send error
-  if (user === null) {
-    res.status(403).send('Invalid email or password');
-  } else {
-    res.cookie('user_id', user.id);
-    res.redirect('/urls');
-  }
-});
+// if the user does not exist, send error
+if (user === null) {
+  res.status(403).send('Invalid email or password');
+} else {
+  res.cookie('user_id', user.id);
+  res.redirect('/urls');
+};
+
 
 
 app.listen(PORT, () => {

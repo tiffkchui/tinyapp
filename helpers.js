@@ -1,3 +1,4 @@
+
 // how we generate random strings length = 6
 const generateRandomString = () => {
   const alphaNumerical = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -6,6 +7,18 @@ const generateRandomString = () => {
     result += alphaNumerical.charAt(Math.floor(Math.random() * alphaNumerical.length));
   }
   return result;
+};
+
+
+//checks if URL is valid input
+const isValidHttpUrl = function (string) {
+  let url;
+  try {
+      url = new URL(string);
+  } catch (_) {
+      return false;
+  }
+  return url.protocol === "http:" || url.protocol === "https:";
 };
 
 // check to see if email exist
@@ -48,6 +61,9 @@ const urlsForUser = (id, db) => {
   }
   return userURLs;
 };
+
+
+
 //remember user by their email
 function getUserByEmail(email) {
   for (const id in users) {
@@ -60,16 +76,5 @@ function getUserByEmail(email) {
 }
 
 
-// added it for mocha testing to match compass
-const getUserByEmail = (email, db) => {
-  // loop in database keys
-  for (let key in db) {
-    // compare the emails, if they match return the user obj
-    if (db[key].email === email) {
-      return db[key];
-    }
-  }
-  return undefined;
-};
 
 module.exports = { generateRandomString,findEmail, findPassword, findUserID, urlsForUser, getUserByEmail };
