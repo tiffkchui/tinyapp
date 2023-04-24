@@ -5,12 +5,15 @@ const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
 const PORT = 8080; // default port 8080
 const cookieSession = require('cookie-session');
-const { getUserByEmail} = require('./helpers.js');
+
+//CALL UPON FUNCTIONS IN HELPERS.JS
+const { generateRandomString, findEmail, findPassword, findUserID, urlsForUser } = require("./helpers.js");
+
 
 //MIDDLEWARE
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev')); //console logs the request that comes on terminal
 app.use(cookieSession({ name: 'session', keys: ['key1', 'key2'] }));
 app.use((req, res, next) => {
@@ -53,14 +56,13 @@ const users = {
 // MY URLS
 
 app.get("/urls", (req, res) => {
-  const userID = req.session.user_id; // only logged in users will have a cookie
-  user: users[userID];
-  const userURLS = urlsForUser(userID, urlDatabase);
-
   const templateVars = {
-    urls: userURLS,
-    user: user
+    urls: urlsForUser(req.session.userID, urlDatabase),
+    user: users[req.session["userID"]]
   };
+  res.render("urls_index", templateVars);
+
+
 
   if (!user) {
     return document.body.innerHTML = "<p>401: ERROR. Unauthorised. Please log in to view page.";
@@ -126,10 +128,25 @@ app.get('/register', (req, res) => {
 
 // USER REGISTRATION 
 app.post('/register', (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Name, email, and password are required' });
+  const userId = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+  const UserCredentials = createNewUser(userId, email, password);
+  
+  if (UserCredentials.error) {
+    return res.send(UserCredentials.error);
   }
+
+  function getUserByEmail(email) {
+    for (const id in users) {
+      const user = users[id];
+      if (user.email === email) {
+        return user;
+      }
+    }
+    return null;
+  }
+
   const existingUser = getUserByEmail(email);
   if (existingUser) {
     return res.status(400).json({ error: 'Email already exists' });
@@ -147,7 +164,7 @@ app.post('/register', (req, res) => {
 
 
 // LOGIN PAGE
-app.get("/login", (req, res) => {
+app.get('/login', (req, res) => {
   const templateVars = {
     userID: null,
     user: users[req.session.userID],
