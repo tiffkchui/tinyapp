@@ -8,7 +8,7 @@ const generateRandomString = () => {
   return result;
 };
 
-//check to see if email exist
+// check to see if email exist
 const findEmail = (email, db) => {
   for (let key in db) {
     if (email === db[key].email) {
@@ -55,7 +55,6 @@ const urlsForUser = (id, db) => {
 const getUserByEmail = (email, db) => {
   // loop in database keys
   for (let key in db) {
-
     // compare the emails, if they match return the user obj
     if (db[key].email === email) {
       return db[key];
@@ -63,8 +62,5 @@ const getUserByEmail = (email, db) => {
   }
   return undefined;
 };
-
-
-
 
 module.exports = { generateRandomString,findEmail, findPassword, findUserID, urlsForUser, getUserByEmail };

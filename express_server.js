@@ -1,20 +1,18 @@
 const express = require("express");
 const app = express();
+const morgan = require('morgan');
+const bcrypt = require('bcryptjs');
 const PORT = 8080; // default port 8080
+const cookieSession = require('cookie-session');
 const { getUserByEmail } = require('../helpers.js');
 
-
-
 //MIDDLEWARE
-const cookieSession = require('cookie-session');
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev')); //console logs the request that comes on terminal
 app.use(cookieSession({ name: 'session', keys: ['key1', 'key2'] }));
-const morgan = require('morgan');
-app.use(morgan());
 app.set("view engine", "ejs");
 
-app.use(express.urlencoded({ extended: true }));
-
-const bcrypt = require("bcryptjs");
+//PASSWORD ENCRYPTION
 const password = "wowitsgreat"; // found in the req.body object
 const hashedPassword = bcrypt.hashSync(password, 10);
 
@@ -24,6 +22,10 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
 
 
 // generates random string of letters + numbers to create a short URL
@@ -37,7 +39,6 @@ function generateRandomString() {
 
   return result;
 }
-
 
 
 // USER
@@ -55,47 +56,7 @@ const users = {
 };
 
 
-// LOGIN
-app.post('/login', (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  const user = getUserByEmail(email);
 
-  if (user === null || !bcrypt.compareSync(password, user.password)) {
-    res.status(403).send('Invalid email or password');
-  } else {
-    req.session.user_id = user.id;
-    res.redirect('/urls');
-  }
-});
-
-// sample REST get call
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-//SAMPLE hello
-// app.get("/hello", (req, res) => {
-//   const templateVars = { greeting: "Hello World!" };
-//   res.render("hello_world", templateVars);
-// });
-
-app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
-});
-
-app.get("/fetch", (req, res) => {
-  res.send(`a = ${a}`);
-});
 
 // MY URLS
 app.get("/urls", (req, res) => {
@@ -104,14 +65,6 @@ app.get("/urls", (req, res) => {
     user: users[req.session.user_id]
   };
   res.render("urls_index", templateVars);
-});
-
-
-// DELETE URL
-app.post('/urls/:id/delete', (req, res) => {
-  const id = req.params.id;
-  delete urlDatabase[id];
-  res.redirect('/urls');
 });
 
 // GET LONG URL FROM SHORT URL ID
@@ -124,6 +77,14 @@ app.get("/urls/:id", (req, res) => {
   templateVars.longURL = longURL;
   res.render('urls_show', templateVars);
 });
+
+// DELETE URL
+app.post('/urls/:id/delete', (req, res) => {
+  const id = req.params.id;
+  delete urlDatabase[id];
+  res.redirect('/urls');
+});
+
 
 
 // REGISTRATION PAGE
@@ -181,6 +142,24 @@ app.post("/urls", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
+});
+
+
+
+
+
+// LOGIN
+app.post('/login', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = getUserByEmail(email);
+
+  if (user === null || !bcrypt.compareSync(password, user.password)) {
+    res.status(403).send('Invalid email or password');
+  } else {
+    req.session.user_id = user.id;
+    res.redirect('/urls');
+  }
 });
 
 
