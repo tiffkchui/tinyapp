@@ -48,7 +48,16 @@ const urlsForUser = (id, db) => {
   }
   return userURLs;
 };
-
+//remember user by their email
+function getUserByEmail(email) {
+  for (const id in users) {
+    const user = users[id];
+    if (user.email === email) {
+      return user;
+    }
+  }
+  return null;
+}
 
 
 // added it for mocha testing to match compass

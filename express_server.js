@@ -33,24 +33,6 @@ const urlDatabase = {
 };
 
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-
-// generates random string of letters + numbers to create a short URL
-function generateRandomString() {
-  const alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-
-  for (let i = 0; i < 6; i++) {
-    result += alphanumeric.charAt(Math.floor(Math.random() * alphanumeric.length));
-  }
-
-  return result;
-}
-
-
 // USER
 const users = {
   userRandomID: {
@@ -67,12 +49,22 @@ const users = {
 
 
 // MY URLS
+
 app.get("/urls", (req, res) => {
+  const userID = req.session.user_id; // only logged in users will have a cookie
+  user: users[userID];
+  const userURLS = urlsForUser(userID, urlDatabase);
+
   const templateVars = {
-    urls: urlDatabase,
-    user: users[req.session.user_id]
+    urls: userURLS,
+    user: user
   };
-  res.render("urls_index", templateVars);
+
+  if (!user) {
+   return document.body.innerHTML = "<p>401: ERROR. Unauthorised. Please log in to view page.";
+  }
+  
+  res.render("url_index", templateVars);
 });
 
 // SHORT URL GENERATOR PAGE
@@ -120,15 +112,6 @@ app.get('/register', (req, res) => {
   res.render('urls_registration');
 });
 
-function getUserByEmail(email) {
-  for (const id in users) {
-    const user = users[id];
-    if (user.email === email) {
-      return user;
-    }
-  }
-  return null;
-}
 
 // USER REGISTRATION 
 app.post('/register', (req, res) => {
@@ -182,13 +165,6 @@ app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect('/login');
 });
-
-
-// USER LOGIN
-app.post('/login', (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  let user = null;
 
   // Find the user with the given email and password in the users object
   for (const userId in users) {
