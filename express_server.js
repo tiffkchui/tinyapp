@@ -7,10 +7,20 @@ const cookieSession = require('cookie-session');
 const { getUserByEmail } = require('../helpers.js');
 
 //MIDDLEWARE
+app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev')); //console logs the request that comes on terminal
 app.use(cookieSession({ name: 'session', keys: ['key1', 'key2'] }));
-app.set("view engine", "ejs");
+app.use((req, res, next) => {
+  res.locals.user = req.session.user;
+  next();
+});
+
+//homepage
+app.get('/', (req, res) => {
+  //tells user where to login 
+  res.send('<h1>Welcome to the home page! </h1> Please login <a href="/login">here<a/>');
+});
 
 //PASSWORD ENCRYPTION
 const password = "wowitsgreat"; // found in the req.body object
@@ -56,8 +66,6 @@ const users = {
 };
 
 
-
-
 // MY URLS
 app.get("/urls", (req, res) => {
   const templateVars = {
@@ -65,6 +73,27 @@ app.get("/urls", (req, res) => {
     user: users[req.session.user_id]
   };
   res.render("urls_index", templateVars);
+});
+
+// SHORT URL GENERATOR PAGE
+app.get("/urls/new", (req, res) => {
+  const templateVars = {
+    user: req.session.user
+  };
+  res.render("urls_new", templateVars);
+});
+
+// GENERATES SHORT URLS FROM LONG URLS
+app.post("/urls", (req, res) => {
+  const shortURL = generateRandomString(); // generate a new short URL
+  urlDatabase[shortURL] = req.body.longURL; // save the id-longURL pair to urlDatabase
+  res.redirect(`/urls/${shortURL}`); // redirect the user to the new short URL's page
+});
+
+// 
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
 });
 
 // GET LONG URL FROM SHORT URL ID
@@ -84,7 +113,6 @@ app.post('/urls/:id/delete', (req, res) => {
   delete urlDatabase[id];
   res.redirect('/urls');
 });
-
 
 
 // REGISTRATION PAGE
@@ -123,29 +151,15 @@ app.post('/register', (req, res) => {
 });
 
 
-// SHORT URL GENERATOR PAGE
-app.get("/urls/new", (req, res) => {
+
+// LOGIN PAGE
+app.get("/login", (req, res) => {
   const templateVars = {
-    user: req.session.user
+    userID: null,
+    user: users[req.session.userID],
   };
-  res.render("urls_new", templateVars);
+  res.render("urls_login", templateVars);
 });
-
-// GENERATES SHORT URLS FROM LONG URLS
-app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString(); // generate a new short URL
-  urlDatabase[shortURL] = req.body.longURL; // save the id-longURL pair to urlDatabase
-  res.redirect(`/urls/${shortURL}`); // redirect the user to the new short URL's page
-});
-
-// 
-app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
-});
-
-
-
 
 
 // LOGIN
@@ -163,13 +177,10 @@ app.post('/login', (req, res) => {
 });
 
 
-// LOGIN PAGE
-app.get("/login", (req, res) => {
-  const templateVars = {
-    userID: null,
-    user: users[req.session.userID],
-  };
-  res.render("urls_login", templateVars);
+// LOGOUT
+app.post('/logout', (req, res) => {
+  req.session = null;
+  res.redirect('/login');
 });
 
 
@@ -197,17 +208,6 @@ app.post('/login', (req, res) => {
   }
 });
 
-// LOGOUT
-app.post('/logout', (req, res) => {
-  req.session = null;
-  res.redirect('/login');
-});
-
-
-app.use((req, res, next) => {
-  res.locals.user = req.session.user;
-  next();
-});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
