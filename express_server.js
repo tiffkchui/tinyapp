@@ -11,7 +11,9 @@ const { generateRandomString, findEmail, findPassword, findUserID, urlsForUser }
 
 
 //MIDDLEWARE
+
 app.set("view engine", "ejs");
+
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev')); //console logs the request that comes on terminal
@@ -60,14 +62,11 @@ app.get("/urls", (req, res) => {
     urls: urlsForUser(req.session.userID, urlDatabase),
     user: users[req.session["userID"]]
   };
-  res.render("urls_index", templateVars);
-
-
+  res.render("urls_index", templateVars)
 
   if (!user) {
     return document.body.innerHTML = "<p>401: ERROR. Unauthorised. Please log in to view page.";
   }
-
   res.render("url_index", templateVars);
 });
 
@@ -109,7 +108,13 @@ app.post('/urls/:id', (req, res) => {
   // Update the longURL of the specified ID in the database
   urls[id].longURL = longURL;
   // Redirect the user to the /urls page
-  res.redirect('/urls');
+
+  if (!req.session['user_id']) {
+    const templateVars = {
+      msg: 'Error: Does Not Exist'
+    };
+    res.render('error', templateVars);
+    res.redirect('/urls');
 });
 
 // DELETE URL
@@ -181,11 +186,12 @@ app.post('/login', (req, res) => {
     res.status(403).send('Please fill in the field.');
     return;
   }
-
+  req.session.user_id = user.
+  res.redirect('/urls');
+});
 
 
 const getUserByEmail = function(email, users) {
-  // lookup magic...
   for (const key in users) {
     if(users[key].email === email) {
       return users[key];
@@ -200,8 +206,7 @@ const getUserByEmail = function(email, users) {
   if (!bcrypt.compareSync(password, user.password)) {
     res.status(403).send('Error: Incorrect password');
     return;
-  }
-});
+  };
 
 app.post('/urls', (req, res) => {
   if (!req.session['user_id']) {
