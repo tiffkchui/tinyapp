@@ -108,17 +108,24 @@ app.post('/urls/:id', (req, res) => {
   // Update the longURL of the specified ID in the database
   urls[id].longURL = longURL;
   // Redirect the user to the /urls page
-
-  if (!req.session['user_id']) {
+});
+  if (!req.session.user_id) {
     const templateVars = {
-      msg: 'Error: Does Not Exist'
+      msg: 'Error: Non-existent. Please try again.'
     };
     res.render('error', templateVars);
     res.redirect('/urls');
-});
+};
 
 // DELETE URL
 app.post('/urls/:id/delete', (req, res) => {
+  if (!req.session['user_id']) {
+    const templateVars = {
+      msg: 'NON-EXISTENT'
+    };
+    res.render('error', templateVars);
+    return;
+  }
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect('/urls');
@@ -209,14 +216,14 @@ const getUserByEmail = function(email, users) {
   };
 
 app.post('/urls', (req, res) => {
-  if (!req.session['user_id']) {
+  if (!req.session.user_id) {
     res.send('Not logged in.');
   }
 
   const key = generateRandomString();
   urlDatabase[key] = {
     longURL: req.body.longURL,
-    userID: req.session['user_id'],
+    userID: req.session.user_id,
   }; res.redirect('/urls');
 });
 
