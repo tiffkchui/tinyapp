@@ -2,9 +2,10 @@ const express = require("express");
 const app = express();
 const morgan = require('morgan');
 const bcrypt = require('bcryptjs');
+const bodyParser = require('body-parser');
 const PORT = 8080; // default port 8080
 const cookieSession = require('cookie-session');
-const { getUserByEmail} = require('./helpers');
+const { getUserByEmail} = require('./helpers.js');
 
 //MIDDLEWARE
 app.set("view engine", "ejs");
@@ -16,9 +17,9 @@ app.use((req, res, next) => {
   next();
 });
 
-//homepage
+//HOMEPAGE
 app.get('/', (req, res) => {
-  //tells user where to login 
+  //TELLS USER WHERE TO LOGIN
   res.send('<h1>Welcome to the home page! </h1> Please login <a href="/login">here<a/>');
 });
 
@@ -99,6 +100,15 @@ app.get("/urls/:id", (req, res) => {
   res.render('urls_show', templateVars);
 });
 
+app.post('/urls/:id', (req, res) => {
+  const id = req.params.id;
+  const longURL = req.body.longURL;
+  // Update the longURL of the specified ID in the database
+  urls[id].longURL = longURL;
+  // Redirect the user to the /urls page
+  res.redirect('/urls');
+});
+
 // DELETE URL
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
@@ -166,22 +176,18 @@ app.post('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-// Find the user with the given email and password in the users object
-for (const userId in users) {
-  const u = users[userId];
-  if (u.email === email && u.password === password) {
-    user = u;
-    break;
-  }
-}
 
 // if the user does not exist, send error
-if (user === null) {
-  res.status(403).send('Invalid email or password');
-} else {
-  res.cookie('user_id', user.id);
-  res.redirect('/urls');
-};
+const email = req.body.email;
+const user = getUserByEmail(email, users);
+if (typeof user === 'undefined') {
+  res.status(403).send('Error: Incorrect username or password');
+  return;
+}
+if (!bcrypt.compareSync(password, user.password)) {
+  res.status(403).send('Error: Incorrect password');
+  return;
+}
 
 
 
