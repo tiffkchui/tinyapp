@@ -126,26 +126,18 @@ app.get('/register', (req, res) => {
 });
 
 
-// USER REGISTRATION 
+// USER REGISTRATION
+
 app.post('/register', (req, res) => {
   const userId = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
   const UserCredentials = createNewUser(userId, email, password);
-  
-  if (UserCredentials.error) {
-    return res.send(UserCredentials.error);
+
+  if (!email || !password) {
+    return res.status(400).send('Unable to authenticate email or password.');
   }
 
-  function getUserByEmail(email) {
-    for (const id in users) {
-      const user = users[id];
-      if (user.email === email) {
-        return user;
-      }
-    }
-    return null;
-  }
 
   const existingUser = getUserByEmail(email);
   if (existingUser) {
@@ -185,18 +177,56 @@ app.post('/login', (req, res) => {
     req.session.user_id = user.id;
     res.redirect('/urls');
   }
+  if (!email || !password) {
+    res.status(403).send('Please fill in the field.');
+    return;
+  }
+
+
+
+const getUserByEmail = function(email, users) {
+  // lookup magic...
+  for (const key in users) {
+    if(users[key].email === email) {
+      return users[key];
+    }
+  }
+};
+
+  if (typeof user === 'undefined') {
+    res.status(403).send('Error: Incorrect username or password');
+    return;
+  }
+  if (!bcrypt.compareSync(password, user.password)) {
+    res.status(403).send('Error: Incorrect password');
+    return;
+  }
+});
+
+app.post('/urls', (req, res) => {
+  if (!req.session['user_id']) {
+    res.send('Not logged in.');
+  }
+
+  const key = generateRandomString();
+  urlDatabase[key] = {
+    longURL: req.body.longURL,
+    userID: req.session['user_id'],
+  }; res.redirect('/urls');
 });
 
 
-// LOGOUT
-app.post('/logout', (req, res) => {
-  req.session = null;
-  res.redirect('/login');
-});
+
+
+  // LOGOUT
+  app.post('/logout', (req, res) => {
+    req.session = null;
+    res.redirect('/login');
+  });
 
 
 
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
+  app.listen(PORT, () => {
+    console.log(`Example app listening on port ${PORT}!`);
+  });
