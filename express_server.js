@@ -7,7 +7,7 @@ const PORT = 8080; // default port 8080
 const cookieSession = require('cookie-session');
 
 //CALL UPON FUNCTIONS IN HELPERS.JS
-const { generateRandomString, findEmail, findPassword, findUserID, urlsForUser } = require("./helpers.js");
+const { generateRandomString, findEmail, findPassword, findUserID, urlsForUser, getUserByEmail, getUser} = require("./helpers.js");
 
 
 //MIDDLEWARE
@@ -54,14 +54,19 @@ const users = {
 };
 
 
+
+
 // MY URLS
 
 app.get("/urls", (req, res) => {
+  
+  const user = getUser(req);
+
   if (!user) {
-    res.send = "<p>401: ERROR. Unauthorised. Please log in to view page.";
+    res.send("<p>401: ERROR. Unauthorised. Please log in to view page.</p>");
+    return;
   }
 
-  const user = getUser(req);
   const filteredDatabase = urlsForUser(user.id);
   const templateVars = {
     user_id: users[req.session.user_id],
@@ -72,19 +77,7 @@ app.get("/urls", (req, res) => {
 
 
 // SHORT URL GENERATOR PAGE
-app.get('/urls/new', (req, res) => {
-  const user = getUser(req);
-  if (!user) {
-    res.redirect('/login');
-    return;
-  }
-
-  const templateVars = {
-    user: user,
-    urls: urlDatabase
-  };
-  res.render('urls_new', templateVars);
-});
+  
 
 app.get('/u/:id', (req, res) => {
     
@@ -126,20 +119,21 @@ app.post('/urls/:id', (req, res) => {
   const longURL = req.body.longURL;
   // Update the longURL of the specified ID in the database
   urls[id].longURL = longURL;
-  // Redirect the user to the /urls page
-});
 
-if (!req.session.user_id) {
-  const templateVars = {
-    msg: 'Error: Non-existent. Please try again.'
-  };
-  res.render('error', templateVars);
+  if (!req.session.userId) {
+    const templateVars = {
+      msg: 'Error: Non-existent. Please try again.'
+    };
+    return res.render('error', templateVars);
+  }
+
+  // Redirect the user to the /urls page
   res.redirect('/urls');
-};
+});
 
 // DELETE URL
 app.post('/urls/:id/delete', (req, res) => {
-  if (!req.session['user_id']) {
+  if (!req.session.userId) {
     const templateVars = {
       msg: 'NON-EXISTENT'
     };
@@ -199,7 +193,7 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = getUserByEmail(email);
+  const user = getUserByEmail(email, users);
 
   if (user === null || !bcrypt.compareSync(password, user.password)) {
     res.status(403).send('Invalid email or password');
@@ -211,11 +205,6 @@ app.post('/login', (req, res) => {
     res.status(403).send('Please fill in the field.');
     return;
   }
-  req.session.user_id = user.
-    res.redirect('/urls');
-});
-
-const user = getUserbyEmail(email, users);
 
 if (typeof user === 'undefined') {
   res.status(403).send('Error: incorrect email or password');
@@ -225,6 +214,11 @@ if (!bcrypt.compareSync(password, user.password)) {
   res.status(403).send('Error: incorrect email or password. Please try again.');
   return;
 };
+  req.session.user_id = user.
+    res.redirect('/urls');
+});
+
+
 
 app.get('/urls', (req, res) => {
   const user = getUser(req);
@@ -260,7 +254,6 @@ app.post('/urls', (req, res) => {
   if (!req.session.user_id) {
     res.send('Error: Please log in.');
   }
-
   const key = generateRandomString();
   urlDatabase[key] = {
     longURL: req.body.longURL,
@@ -274,8 +267,6 @@ app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect('/login');
 });
-
-
 
 
 app.listen(PORT, () => {

@@ -75,6 +75,24 @@ function getUserByEmail(email) {
   return null;
 }
 
+const getUser = function(req) {
+  const user = req.session.userId ? users[req.session.userId] : null;
+  return user;
+};
+
+const urlDatabase = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+};
+  for (let key in urlDatabase) {
+    if (id === urlDatabase[key].userID) {
+      filteredDB[key] = urlDatabase[key];
+    }
+    return filteredDatabase;
+  }
+
+  
 
 
-module.exports = { generateRandomString,findEmail, findPassword, findUserID, urlsForUser, getUserByEmail };
+
+module.exports = { generateRandomString,findEmail, findPassword, findUserID, urlsForUser, getUserByEmail, getUser};
