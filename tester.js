@@ -72,11 +72,25 @@ app.get("/urls", (req, res) => {
 
 
 // SHORT URL GENERATOR PAGE
-app.get("/urls/new", (req, res) => {
+app.get('/urls/new', (req, res) => {
+  const user = getUser(req);
+  if (!user) {
+    res.redirect('/login');
+    return;
+  }
+
   const templateVars = {
-    user: req.session.user
+    user: user,
+    urls: urlDatabase
   };
-  res.render("urls_new", templateVars);
+  res.render('urls_new', templateVars);
+});
+
+app.get('/u/:id', (req, res) => {
+    
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+  res.redirect(longURL);
+
 });
 
 // GENERATES SHORT URLS FROM LONG URLS
