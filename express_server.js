@@ -201,14 +201,6 @@ app.post('/login', (req, res) => {
 });
 
 
-const getUserByEmail = function(email, users) {
-  for (const key in users) {
-    if(users[key].email === email) {
-      return users[key];
-    }
-  }
-};
-
   if (typeof user === 'undefined') {
     res.status(403).send('Error: Incorrect username or password');
     return;
