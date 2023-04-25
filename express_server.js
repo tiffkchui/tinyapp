@@ -80,9 +80,13 @@ app.get("/urls/new", (req, res) => {
 
 // GENERATES SHORT URLS FROM LONG URLS
 app.post("/urls", (req, res) => {
+  if (!req.session.user_id) {
+    res.send('Error: Please log in to access.');
+  }
+  
   const shortURL = generateRandomString(); // generate a new short URL
   urlDatabase[shortURL] = req.body.longURL; // save the id-longURL pair to urlDatabase
-  res.redirect(`/urls/${shortURL}`); // redirect the user to the new short URL's page
+  res.redirect('/urls'); // redirect the user to the new short URL's page
 });
 
 // 
@@ -149,7 +153,6 @@ app.post('/register', (req, res) => {
   if (!email || !password) {
     return res.status(400).send('Unable to authenticate email or password.');
   }
-
 
   const existingUser = getUserByEmail(email);
   if (existingUser) {
