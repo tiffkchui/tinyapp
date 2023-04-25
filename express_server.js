@@ -27,6 +27,7 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
   //TELLS USER WHERE TO LOGIN
   res.send('<h1>Welcome to the home page! </h1> Please login <a href="/login">here<a/>');
+  res.redirect('urls_login');
 });
 
 //PASSWORD ENCRYPTION
@@ -58,17 +59,19 @@ const users = {
 // MY URLS
 
 app.get("/urls", (req, res) => {
-  const templateVars = {
-    urls: urlsForUser(req.session.userID, urlDatabase),
-    user: users[req.session["userID"]]
-  };
-  res.render("urls_index", templateVars)
-
   if (!user) {
-    return document.body.innerHTML = "<p>401: ERROR. Unauthorised. Please log in to view page.";
+    res.send = "<p>401: ERROR. Unauthorised. Please log in to view page.";
   }
-  res.render("url_index", templateVars);
+
+  const user = getUser(req);
+  const filteredDatabase = urlsForUser(user.id);
+  const templateVars = {
+    user_id: users[req.session.user_id],
+    urls: filteredDatabase,
+  };
+  res.render('urls_index', templateVars);
 });
+
 
 // SHORT URL GENERATOR PAGE
 app.get("/urls/new", (req, res) => {
@@ -83,7 +86,7 @@ app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
     res.send('Error: Please log in to access.');
   }
-  
+
   const shortURL = generateRandomString(); // generate a new short URL
   urlDatabase[shortURL] = req.body.longURL; // save the id-longURL pair to urlDatabase
   res.redirect('/urls'); // redirect the user to the new short URL's page
@@ -113,12 +116,12 @@ app.post('/urls/:id', (req, res) => {
   urls[id].longURL = longURL;
   // Redirect the user to the /urls page
 });
-  if (!req.session.user_id) {
-    const templateVars = {
-      msg: 'Error: Non-existent. Please try again.'
-    };
-    res.render('error', templateVars);
-    res.redirect('/urls');
+if (!req.session.user_id) {
+  const templateVars = {
+    msg: 'Error: Non-existent. Please try again.'
+  };
+  res.render('error', templateVars);
+  res.redirect('/urls');
 };
 
 // DELETE URL
@@ -138,6 +141,10 @@ app.post('/urls/:id/delete', (req, res) => {
 
 // REGISTRATION PAGE
 app.get('/register', (req, res) => {
+  if (user) {
+    res.redirect('/urls');
+    return;
+  }
   res.render('urls_registration');
 });
 
@@ -197,18 +204,52 @@ app.post('/login', (req, res) => {
     return;
   }
   req.session.user_id = user.
-  res.redirect('/urls');
+    res.redirect('/urls');
 });
 
 
-  if (typeof user === 'undefined') {
-    res.status(403).send('Error: Incorrect username or password');
+if (typeof user === 'undefined') {
+  res.status(403).send('Error: Incorrect username or password');
+  return;
+}
+if (!bcrypt.compareSync(password, user.password)) {
+  res.status(403).send('Error: Incorrect password');
+  return;
+};
+
+app.get('/urls', (req, res) => {
+  const user = getUser(req);
+  if (!user) {
+    res.send('Error: Not logged in');
     return;
   }
-  if (!bcrypt.compareSync(password, user.password)) {
-    res.status(403).send('Error: Incorrect password');
+  res.render('urls_index', templateVars);
+});
+
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+app.get('/urls/new', (req, res) => {
+  const user = getUser(req);
+  if (!user) {
+    res.redirect('/login');
     return;
+  }
+
+  const templateVars = {
+    user: user,
+    urls: urlDatabase
   };
+  res.render('urls_new', templateVars);
+});
+
+app.get('/u/:shortURL', (req, res) => {
+
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+  res.redirect(longURL);
+
+});
 
 app.post('/urls', (req, res) => {
   if (!req.session.user_id) {
@@ -225,15 +266,15 @@ app.post('/urls', (req, res) => {
 
 
 
-  // LOGOUT
-  app.post('/logout', (req, res) => {
-    req.session = null;
-    res.redirect('/login');
-  });
+// LOGOUT
+app.post('/logout', (req, res) => {
+  req.session = null;
+  res.redirect('/login');
+});
 
 
 
 
-  app.listen(PORT, () => {
-    console.log(`Example app listening on port ${PORT}!`);
-  });
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
