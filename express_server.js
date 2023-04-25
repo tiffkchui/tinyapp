@@ -37,9 +37,19 @@ const users = {
   },
 };
 
+//PASSWORD ENCRYPTION
+const password = "wowitsgreat"; // found in the req.body object
+const hashedPassword = bcrypt.hashSync(password, 10);
+
+
+//HOMEPAGE
+app.get('/', (req, res) => {
+  res.redirect('login');
+});
 
 
 //URLS
+
 app.get('/urls', (req, res) => {
   const user = getUser(req);
   if (!user) {
@@ -99,6 +109,13 @@ app.post('/urls/:id', (req, res) => {
   urls[id].longURL = longURL;
   // Redirect the user to the /urls page
 });
+if (!req.session.user_id) {
+  const templateVars = {
+    msg: 'Error: Non-existent. Please try again.'
+  };
+  res.render('error', templateVars);
+  res.redirect('/urls');
+};
 
 
 
