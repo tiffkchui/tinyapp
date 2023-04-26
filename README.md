@@ -6,12 +6,12 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ![login page]([docs/Image 4-25-23 at 6.51 PM.jpg](https://github.com/tiffkchui/tinyapp/blob/396435aaa57e10342679650deb670821910ae7f9/docs/Image%204-25-23%20at%206.51%20PM.jpg)
 
-![registration page]([https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true](https://github.com/tiffkchui/tinyapp/blob/d07316f89407f21438f94555baf0f6e6411cc965/docs/Image%204-25-23%20at%206.53%20PM.jpg))
+![main page after login](docs/Image 4-25-23 at 7.03 PM.jpg)
 
-![shorten long URLs]([https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true](https://github.com/tiffkchui/tinyapp/blob/d07316f89407f21438f94555baf0f6e6411cc965/docs/Image%204-25-23%20at%207.03%20PM%20(1).jpg)
-![alt text](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
+![registration page](docs/Image 4-25-23 at 6.53 PM.jpg)
 
-![alt text](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
+![shorten long URLs](docs/Image 4-25-23 at 7.03 PM (1).jpg)
+
 
 
 ## Dependencies
