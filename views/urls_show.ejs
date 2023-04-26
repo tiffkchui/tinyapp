@@ -27,6 +27,7 @@
           </a>
           <!-- input long url and generate and render short url form  -->
         <form method="POST" action="/urls"> 
+          <input type="hidden" name="shortURL" value="<%= id %>">
           <div class="form-group">
             <label for="longURL">Long URL:</label>
             <input type="text" class="form-control" id="longURL" name="longURL" value="<%= longURL %>">
