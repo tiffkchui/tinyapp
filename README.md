@@ -8,7 +8,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ![main page after login](https://github.com/tiffkchui/tinyapp/blob/a76fe08277b238a5feaffd8e9d7fa6e8ded3b618/docs/Image%204-25-23%20at%207.03%20PM.jpg)
 
-![registration page](docs/Image 4-25-23 at 6.53 PM.jpg](https://github.com/tiffkchui/tinyapp/blob/89f5df81824ef7c6caadbce535ca5c6116e66343/docs/Image%204-25-23%20at%206.53%20PM.jpg)
+![registration page](https://github.com/tiffkchui/tinyapp/blob/89f5df81824ef7c6caadbce535ca5c6116e66343/docs/Image%204-25-23%20at%206.53%20PM.jpg)
 
 ![shorten long URLs](https://github.com/tiffkchui/tinyapp/blob/89f5df81824ef7c6caadbce535ca5c6116e66343/docs/Image%204-25-23%20at%207.03%20PM%20(1).jpg)
 
